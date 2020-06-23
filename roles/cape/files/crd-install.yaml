@@ -1,0 +1,1396 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: applications.operator.cape.sh
+spec:
+  group: operator.cape.sh
+  names:
+    kind: Application
+    listKind: ApplicationList
+    plural: applications
+    singular: application
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: Application is the Schema for the applications API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: ApplicationSpec defines the desired state of Application
+          properties:
+            branch:
+              description: Branch refers to the git branch
+              type: string
+            chart:
+              description: Chart is the name of the chart inside of Helm Repository
+              type: string
+            folder:
+              description: Folder is the path to find manifests or helm chart
+              type: string
+            namespace:
+              description: Namespace in which application needs will be deployed,this
+                can be overwritten during deployment
+              type: string
+            recursive:
+              description: Recursive signifies application of contents recursively
+                in folder
+              type: boolean
+            repoRef:
+              description: RepoRef refers to the repository
+              type: string
+            sync:
+              description: Sync signifies automatic syncing of manifest contents
+              type: boolean
+            type:
+              description: Type is the type of app kustomize,helm or manifest
+              enum:
+              - kustomize
+              - helm
+              - manifest
+              type: string
+            version:
+              description: Version is the helm chart version
+              type: string
+          required:
+          - repoRef
+          - type
+          type: object
+        status:
+          description: ApplicationStatus defines the observed state of Application
+          properties:
+            chartIndex:
+              description: ChartIndex is cached list of charts in a helm repository
+              type: string
+            conditions:
+              items:
+                description: BasicCondition fields that are expected in a condition
+                properties:
+                  lastProbeTime:
+                    description: Last time we probed the condition.
+                    format: date-time
+                    type: string
+                  lastTransitionTime:
+                    description: Last time the condition transitioned from one status
+                      to another.
+                    format: date-time
+                    type: string
+                  message:
+                    description: Message human readable reason
+                    type: string
+                  reason:
+                    description: Reason simple single word reason in CamleCase
+                    type: string
+                  status:
+                    description: Status is one of True,False,Unknown
+                    type: string
+                  type:
+                    description: Type Condition type
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
+            lastUpdate:
+              format: date-time
+              type: string
+            reason:
+              type: string
+            status:
+              enum:
+              - Success
+              - Failure
+              type: string
+            tree:
+              description: DirectoryTree is the folder cached folder structure from
+                git repo
+              type: string
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: backuplocationoperations.operator.cape.sh
+spec:
+  group: operator.cape.sh
+  names:
+    kind: BackupLocationOperation
+    listKind: BackupLocationOperationList
+    plural: backuplocationoperations
+    shortNames:
+    - bslo
+    singular: backuplocationoperation
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: BackupLocationOperation is the Schema for the backuplocationoperations
+        API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: BackupLocationOperationSpec defines the desired state of BackupLocationOperation
+          properties:
+            backupLocation:
+              type: string
+            clusters:
+              items:
+                type: string
+              type: array
+            kind:
+              type: string
+          required:
+          - backupLocation
+          - clusters
+          - kind
+          type: object
+        status:
+          description: BackupLocationOperationStatus defines the observed state of
+            BackupLocationOperation
+          properties:
+            lastUpdate:
+              format: date-time
+              type: string
+            reason:
+              type: string
+            status:
+              enum:
+              - Success
+              - Failure
+              type: string
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: backuplocations.operator.cape.sh
+spec:
+  group: operator.cape.sh
+  names:
+    kind: BackupLocation
+    listKind: BackupLocationList
+    plural: backuplocations
+    shortNames:
+    - bsl
+    singular: backuplocation
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: BackupLocation is the Schema for the backuplocations API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: BackupLocationSpec defines the desired state of BackupLocation
+          properties:
+            backupLocation:
+              description: BSLConfig is the configuration to use for the backup storage
+                location
+              properties:
+                endpoint:
+                  description: s3Url for Velero Config
+                  type: string
+                fqdn:
+                  description: FQDN is public reachable for Velero Storage Location
+                  type: string
+                provider:
+                  description: Storage Provider (minio, s3), For minio we provision
+                    a minio instance.
+                  type: string
+                settings:
+                  additionalProperties:
+                    type: string
+                  description: Extra settings for cloud providers
+                  type: object
+              required:
+              - provider
+              type: object
+            bucketName:
+              description: Name of the object storage bucket where backups should
+                be stored
+              type: string
+            clusterRef:
+              description: ClusterRef is cluster identifier which owns it
+              type: string
+            clusters:
+              description: Clusters is a list of member clusters having read-only
+                access to this backup-location
+              items:
+                type: string
+              type: array
+            deleteVelero:
+              description: DeleteVelero flag if enabled, deletes velero on uninstalling
+                the biq-velero-operator.
+              type: boolean
+            namespace:
+              description: The namespace in which Velero should operate
+              type: string
+            prefix:
+              description: Prefix under which all Velero data should be stored within
+                the bucket.
+              type: string
+            providerName:
+              description: Provider name for backup and volume storage
+              type: string
+            restic:
+              description: Restic configurations
+              properties:
+                enabled:
+                  description: Enable creating restic deployment
+                  type: boolean
+                hostPodsPath:
+                  description: Represents path of pods in Kubernetes nodes
+                  type: string
+                privileged:
+                  type: boolean
+              required:
+              - enabled
+              - hostPodsPath
+              - privileged
+              type: object
+            secretName:
+              description: Name of the secret object containing credentials for backup
+                and volume provider
+              type: string
+            useVolumeSnapshots:
+              description: Whether or not to create snapshot location automatically.
+                Set to false if you do not plan to create volume snapshots via a storage
+                provider.
+              type: boolean
+            veleroRef:
+              description: VeleroRef is the name of Velero CRDs instance created in
+                the child cluster
+              type: string
+            volumeSnapshotLocation:
+              description: VSLConfig is the configuration to use for the volume snapshot
+                location
+              properties:
+                endpoint:
+                  description: s3Url for Velero Config
+                  type: string
+                fqdn:
+                  description: FQDN is public reachable for Velero Storage Location
+                  type: string
+                provider:
+                  description: Storage Provider (minio, s3), For minio we provision
+                    a minio instance.
+                  type: string
+                settings:
+                  additionalProperties:
+                    type: string
+                  description: Extra settings for cloud providers
+                  type: object
+              required:
+              - provider
+              type: object
+          required:
+          - bucketName
+          - deleteVelero
+          - namespace
+          - providerName
+          - secretName
+          type: object
+        status:
+          description: BackupLocationStatus defines the observed state of BackupLocation
+          properties:
+            conditions:
+              items:
+                description: BasicCondition fields that are expected in a condition
+                properties:
+                  lastProbeTime:
+                    description: Last time we probed the condition.
+                    format: date-time
+                    type: string
+                  lastTransitionTime:
+                    description: Last time the condition transitioned from one status
+                      to another.
+                    format: date-time
+                    type: string
+                  message:
+                    description: Message human readable reason
+                    type: string
+                  reason:
+                    description: Reason simple single word reason in CamleCase
+                    type: string
+                  status:
+                    description: Status is one of True,False,Unknown
+                    type: string
+                  type:
+                    description: Type Condition type
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
+            lastUpdate:
+              format: date-time
+              type: string
+            reason:
+              type: string
+            status:
+              enum:
+              - Success
+              - Failure
+              type: string
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: clusters.operator.cape.sh
+spec:
+  group: operator.cape.sh
+  names:
+    kind: Cluster
+    listKind: ClusterList
+    plural: clusters
+    singular: cluster
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: Cluster is the Schema for the clusters API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: ClusterSpec defines the desired state of Cluster
+          properties:
+            agentMode:
+              description: AgentMode represents if the cluster is behind a firewall
+                and needs to be connected via a remote agent
+              type: boolean
+            component:
+              description: Components details
+              properties:
+                backupDR:
+                  description: BackupDR is true if Velero is Installed
+                  type: boolean
+              type: object
+            credentialSecret:
+              description: SecretName where cluster credentials is stored
+              type: string
+            provider:
+              description: Cluster cloud provider (GKE, EKS etc.)
+              type: string
+            region:
+              description: Geo-location of the cluster
+              type: string
+          required:
+          - provider
+          type: object
+        status:
+          description: ClusterStatus defines the observed state of Cluster
+          properties:
+            conditions:
+              items:
+                description: BasicCondition fields that are expected in a condition
+                properties:
+                  lastProbeTime:
+                    description: Last time we probed the condition.
+                    format: date-time
+                    type: string
+                  lastTransitionTime:
+                    description: Last time the condition transitioned from one status
+                      to another.
+                    format: date-time
+                    type: string
+                  message:
+                    description: Message human readable reason
+                    type: string
+                  reason:
+                    description: Reason simple single word reason in CamleCase
+                    type: string
+                  status:
+                    description: Status is one of True,False,Unknown
+                    type: string
+                  type:
+                    description: Type Condition type
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
+            health:
+              description: Cluster Health information
+              properties:
+                message:
+                  description: Human-readable message of cluster health operation
+                  type: string
+                phase:
+                  description: Phase is the current phase of the health operation
+                  enum:
+                  - Down
+                  - Healthy
+                  - UnHealthy
+                  - Error
+                  type: string
+                updated_at:
+                  description: UpdatedAt is timestamp of when health operation is
+                    performed
+                  format: date-time
+                  type: string
+              type: object
+            lastUpdate:
+              format: date-time
+              type: string
+            nodes:
+              description: Number of worker nodes in the cluster
+              type: integer
+            reason:
+              type: string
+            status:
+              enum:
+              - Success
+              - Failure
+              type: string
+          type: object
+      required:
+      - spec
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: components.operator.cape.sh
+spec:
+  group: operator.cape.sh
+  names:
+    kind: Component
+    listKind: ComponentList
+    plural: components
+    singular: component
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: Component is the Schema for the components API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: ComponentSpec defines the desired state of Component
+          properties:
+            backupLocationRef:
+              description: BackupLocationRef is a reference to default backupLocation
+                while installing velero
+              type: string
+            clusterRef:
+              description: ClusterRef is cluster identifier
+              type: string
+            image:
+              description: Docker image of child operator
+              type: string
+            kind:
+              description: Kind of component
+              type: string
+            settings:
+              additionalProperties:
+                type: string
+              description: Settings/configuration to be used by child operator
+              type: object
+            version:
+              description: Version of child operator
+              type: string
+          required:
+          - clusterRef
+          - kind
+          - version
+          type: object
+        status:
+          description: ComponentStatus defines the observed state of Component
+          properties:
+            components:
+              description: Status of sub-components running on remote cluster
+              items:
+                description: SubComponentStatus contains component installation progress
+                  and status
+                properties:
+                  errorLog:
+                    description: ErrorLog defines reason for the failure
+                    type: string
+                  lastTransitionTime:
+                    description: Last time the condition transitioned from one status
+                      to another.
+                    format: date-time
+                    type: string
+                  lastUpdateTime:
+                    description: The last time this condition was updated.
+                    format: date-time
+                    type: string
+                  name:
+                    description: SubComponentType defines type of sub-components to
+                      install
+                    enum:
+                    - minio
+                    - veleroRestic
+                    - velero
+                    type: string
+                  status:
+                    description: Status of Sub-component
+                    enum:
+                    - success
+                    - failed
+                    - in_progress
+                    - unknown
+                    type: string
+                  version:
+                    description: Version of Sub-component (docker image tag)
+                    type: string
+                required:
+                - name
+                - status
+                type: object
+              type: array
+            conditions:
+              items:
+                properties:
+                  lastProbeTime:
+                    description: Last time we probed the condition.
+                    format: date-time
+                    type: string
+                  lastTransitionTime:
+                    description: Last time the condition transitioned from one status
+                      to another.
+                    format: date-time
+                    type: string
+                  message:
+                    description: Human-readable message indicating details about last
+                      transition.
+                    type: string
+                  reason:
+                    description: Unique, this should be a short, machine understandable
+                      string that gives the reason for condition's last transition.
+                      If it reports "ResizeStarted" that means the underlying persistent
+                      volume is being resized.
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
+            lastUpdate:
+              format: date-time
+              type: string
+            reason:
+              type: string
+            status:
+              enum:
+              - Success
+              - Failure
+              type: string
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: configs.operator.cape.sh
+spec:
+  group: operator.cape.sh
+  names:
+    kind: Config
+    listKind: ConfigList
+    plural: configs
+    singular: config
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: Config is the Schema for the configs API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        data:
+          additionalProperties:
+            type: string
+          type: object
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: ConfigSpec defines the desired state of Config
+          properties:
+            cluster:
+              type: string
+            rules:
+              additionalProperties:
+                type: string
+              type: object
+          required:
+          - cluster
+          type: object
+        status:
+          description: ConfigStatus defines the observed state of Config
+          properties:
+            lastUpdate:
+              format: date-time
+              type: string
+            reason:
+              type: string
+            status:
+              enum:
+              - Success
+              - Failure
+              type: string
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: deployments.operator.cape.sh
+spec:
+  group: operator.cape.sh
+  names:
+    kind: Deployment
+    listKind: DeploymentList
+    plural: deployments
+    shortNames:
+    - capedeploys
+    singular: deployment
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: Deployment is the Schema for the deployments API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: DeploymentSpec defines the desired state of Deployment
+          properties:
+            appRef:
+              description: 'AppRef is the reference to an Application Required: true'
+              type: string
+            clusterRef:
+              description: ClusterRef if present then deploy to a single cluster instead
+                of a federation
+              type: string
+            fedClusters:
+              description: FedClusters are the member clusters of the federation to
+                which the deployment is to be deployed
+              items:
+                type: string
+              type: array
+            federationRef:
+              description: 'FederationRef is the federation to which the deployment
+                will be created Required: true'
+              type: string
+            helmValues:
+              description: if application type if helm, then helm values yaml
+              type: string
+            kustomizeValues:
+              description: if application type is kustomize, then kustomize related
+                image/deployment values
+              type: string
+            namespace:
+              description: Namespace is the namespace on target cluster
+              type: string
+            releaseMeta:
+              description: Release meta for deployments
+              properties:
+                author:
+                  description: Author is the author of the commit
+                  type: string
+                chartVersion:
+                  description: ChartVersion is the version of chart that needs to
+                    be deployed
+                  type: string
+                date:
+                  description: Date is the time of the creation of the commit
+                  format: date-time
+                  type: string
+                message:
+                  description: Message is the commit message
+                  type: string
+                revision:
+                  description: Revision is the branch/tag/hash of the repo
+                  type: string
+                sender:
+                  description: Sender is the creator of the deployment
+                  type: string
+                sha:
+                  description: SHA is the commit sha
+                  type: string
+              type: object
+            settings:
+              description: Extra settings for cloud providers
+              type: string
+          required:
+          - appRef
+          - fedClusters
+          - federationRef
+          - namespace
+          type: object
+        status:
+          description: DeploymentStatus defines the observed state of Deployment
+          properties:
+            history:
+              description: History is the list of release histories
+              items:
+                properties:
+                  author:
+                    description: Author is the author of the commit
+                    type: string
+                  chartVersion:
+                    description: ChartVersion is the version of chart that needs to
+                      be deployed
+                    type: string
+                  clusterRef:
+                    description: ClusterRef if present then deploy to a single cluster
+                      instead of a federation
+                    type: string
+                  createdAt:
+                    description: Date is the time of the creation of the commit
+                    format: date-time
+                    type: string
+                  federationRef:
+                    description: FederationRef is the federation to which the deployment
+                      will be created
+                    type: string
+                  helmValues:
+                    description: if application type if helm, then helm values yaml
+                    type: string
+                  kustomizeValues:
+                    description: if application type is kustomize, then kustomize
+                      related image/deployment values
+                    type: string
+                  memberClusters:
+                    description: MemberClusters are clusters selected to apply federated
+                      members
+                    items:
+                      type: string
+                    type: array
+                  message:
+                    description: Message is the commit message
+                    type: string
+                  resources:
+                    description: Resources created in a member cluster
+                    items:
+                      description: ResourceStatus is the statuses of the resources
+                      properties:
+                        group:
+                          type: string
+                        kind:
+                          type: string
+                        name:
+                          type: string
+                        namespace:
+                          type: string
+                        version:
+                          type: string
+                      type: object
+                    type: array
+                  revision:
+                    description: Revision is the branch/tag/hash of the repo
+                    type: string
+                  sender:
+                    description: Sender is the creator of the deployment
+                    type: string
+                  sha:
+                    description: SHA is the commit sha
+                    type: string
+                  syncResult:
+                    description: SyncResult hold any pertinent messages when attempting
+                      to perform a release (typically errors)
+                    properties:
+                      message:
+                        type: string
+                      phase:
+                        type: string
+                    type: object
+                type: object
+              type: array
+            lastUpdate:
+              format: date-time
+              type: string
+            reason:
+              type: string
+            status:
+              enum:
+              - Success
+              - Failure
+              type: string
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: federations.operator.cape.sh
+spec:
+  group: operator.cape.sh
+  names:
+    kind: Federation
+    listKind: FederationList
+    plural: federations
+    shortNames:
+    - feds
+    singular: federation
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: Federation is the Schema for the federations API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: FederationSpec defines the desired state of Federation
+          properties:
+            host:
+              description: Host is the cluster reference where kubefed controller
+                runs
+              type: string
+            members:
+              description: Members Federation member cluster references
+              items:
+                type: string
+              type: array
+          required:
+          - host
+          type: object
+        status:
+          description: FederationStatus defines the observed state of Federation
+          properties:
+            conditions:
+              description: Array of Conditions as expected to be present in kubernetes
+                resources
+              items:
+                description: BasicCondition fields that are expected in a condition
+                properties:
+                  lastProbeTime:
+                    description: Last time we probed the condition.
+                    format: date-time
+                    type: string
+                  lastTransitionTime:
+                    description: Last time the condition transitioned from one status
+                      to another.
+                    format: date-time
+                    type: string
+                  message:
+                    description: Message human readable reason
+                    type: string
+                  reason:
+                    description: Reason simple single word reason in CamleCase
+                    type: string
+                  status:
+                    description: Status is one of True,False,Unknown
+                    type: string
+                  type:
+                    description: Type Condition type
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
+            federation:
+              description: Federation is the overall federation status
+              properties:
+                lastUpdate:
+                  format: date-time
+                  type: string
+                reason:
+                  type: string
+                status:
+                  enum:
+                  - Success
+                  - Failure
+                  type: string
+              type: object
+            host:
+              description: Host is the status of host cluster
+              properties:
+                lastUpdate:
+                  description: LastUpdate status
+                  format: date-time
+                  type: string
+                message:
+                  description: Message for status updates
+                  type: string
+                status:
+                  description: Status of the federation member
+                  enum:
+                  - Success
+                  - Failure
+                  - Installing
+                  type: string
+              type: object
+            installationStatus:
+              description: InstallationStatus is overall installation status for ControlPlane
+                and Member cluster
+              enum:
+              - Success
+              - Failure
+              - Installing
+              - Terminating
+              type: string
+            memberStatus:
+              additionalProperties:
+                description: FederationMemberStatus defines the status of members
+                  of Federation
+                properties:
+                  lastUpdate:
+                    description: LastUpdate status
+                    format: date-time
+                    type: string
+                  message:
+                    description: Message for status updates
+                    type: string
+                  status:
+                    description: Status of the federation member
+                    enum:
+                    - Success
+                    - Failure
+                    - Installing
+                    type: string
+                type: object
+              description: MemberStatus is the status of each member
+              type: object
+            members:
+              description: Members last known list
+              items:
+                type: string
+              type: array
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: organizations.operator.cape.sh
+spec:
+  group: operator.cape.sh
+  names:
+    kind: Organization
+    listKind: OrganizationList
+    plural: organizations
+    singular: organization
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: Organization is the Schema for the organizations API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: OrganizationSpec defines the desired state of Organization
+          properties:
+            adminEmail:
+              description: 'Important: Run "operator-sdk generate k8s" to regenerate
+                code after modifying this file Add custom validation using kubebuilder
+                tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html'
+              type: string
+            adminName:
+              type: string
+            namespace:
+              type: string
+            stripe:
+              properties:
+                planId:
+                  type: string
+                planName:
+                  type: string
+              required:
+              - planId
+              type: object
+          required:
+          - adminEmail
+          - adminName
+          type: object
+        status:
+          description: OrganizationStatus defines the observed state of Organization
+          properties:
+            conditions:
+              items:
+                description: BasicCondition fields that are expected in a condition
+                properties:
+                  lastProbeTime:
+                    description: Last time we probed the condition.
+                    format: date-time
+                    type: string
+                  lastTransitionTime:
+                    description: Last time the condition transitioned from one status
+                      to another.
+                    format: date-time
+                    type: string
+                  message:
+                    description: Message human readable reason
+                    type: string
+                  reason:
+                    description: Reason simple single word reason in CamleCase
+                    type: string
+                  status:
+                    description: Status is one of True,False,Unknown
+                    type: string
+                  type:
+                    description: Type Condition type
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
+            lastUpdate:
+              format: date-time
+              type: string
+            reason:
+              type: string
+            status:
+              enum:
+              - Success
+              - Failure
+              type: string
+            stripe:
+              description: 'Important: Run "operator-sdk generate k8s" to regenerate
+                code after modifying this file Add custom validation using kubebuilder
+                tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html'
+              properties:
+                customerId:
+                  type: string
+                subcriptionId:
+                  type: string
+                subcriptionItemId:
+                  type: string
+              required:
+              - customerId
+              type: object
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: repositories.operator.cape.sh
+spec:
+  group: operator.cape.sh
+  names:
+    kind: Repository
+    listKind: RepositoryList
+    plural: repositories
+    singular: repository
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: Repository is the Schema for the repositories API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: RepositorySpec defines the desired state of Repository
+          properties:
+            authRef:
+              description: "\treference to the k8s secret"
+              type: string
+            authType:
+              description: username/pass or priv key based auth
+              type: string
+            enableLFS:
+              description: enable large file system support on git repo
+              type: boolean
+            repoType:
+              description: RepoType is the type of repo (git or helm)
+              enum:
+              - git
+              - helm
+              type: string
+            repoURL:
+              description: RepoURL is the git/helm url
+              type: string
+            skipSSL:
+              description: when connecting, skil tls verification
+              type: boolean
+          required:
+          - authRef
+          - authType
+          - enableLFS
+          - repoType
+          - repoURL
+          - skipSSL
+          type: object
+        status:
+          description: RepositoryStatus defines the observed state of Repository
+          properties:
+            conditions:
+              items:
+                description: BasicCondition fields that are expected in a condition
+                properties:
+                  lastProbeTime:
+                    description: Last time we probed the condition.
+                    format: date-time
+                    type: string
+                  lastTransitionTime:
+                    description: Last time the condition transitioned from one status
+                      to another.
+                    format: date-time
+                    type: string
+                  message:
+                    description: Message human readable reason
+                    type: string
+                  reason:
+                    description: Reason simple single word reason in CamleCase
+                    type: string
+                  status:
+                    description: Status is one of True,False,Unknown
+                    type: string
+                  type:
+                    description: Type Condition type
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
+            lastUpdate:
+              format: date-time
+              type: string
+            reason:
+              type: string
+            status:
+              enum:
+              - Success
+              - Failure
+              type: string
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: users.operator.cape.sh
+spec:
+  group: operator.cape.sh
+  names:
+    kind: CapeUser
+    listKind: CapeUserList
+    plural: users
+    singular: capeuser
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: CapeUser is the Schema for the capeusers API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: CapeUserSpec defines the desired state of CapeUser
+          properties:
+            email:
+              type: string
+            name:
+              description: 'Important: Run "operator-sdk generate k8s" to regenerate
+                code after modifying this file Add custom validation using kubebuilder
+                tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html'
+              type: string
+            username:
+              type: string
+          required:
+          - email
+          - username
+          type: object
+        status:
+          description: CapeUserStatus defines the observed state of CapeUser
+          properties:
+            lastUpdate:
+              format: date-time
+              type: string
+            reason:
+              type: string
+            status:
+              enum:
+              - Success
+              - Failure
+              type: string
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true

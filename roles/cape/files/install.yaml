@@ -1,0 +1,688 @@
+apiVersion: v1
+imagePullSecrets:
+- name: registry-secret
+kind: ServiceAccount
+metadata:
+  labels:
+    heritage: cape
+  name: manager
+  namespace: cape
+---
+apiVersion: v1
+imagePullSecrets:
+- name: registry-secret
+kind: ServiceAccount
+metadata:
+  labels:
+    heritage: cape
+  name: web
+  namespace: cape
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    heritage: cape
+  name: configmap-modifier
+  namespace: cape
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - update
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  labels:
+    heritage: cape
+  name: cape-api
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - '*'
+- apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - servicemonitors
+  verbs:
+  - get
+  - create
+- apiGroups:
+  - operator.cape.sh
+  resources:
+  - clusters
+  - clusters/status
+  - components
+  - components/status
+  - backuplocations
+  - backuplocations/status
+  - backuplocationoperations
+  - backuplocationoperations/status
+  - federations
+  - federations/status
+  - organizations
+  verbs:
+  - '*'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    heritage: cape
+  name: cape-crd-creator
+rules:
+- apiGroups:
+  - operator.cape.sh
+  resources:
+  - applications
+  - backuplocations
+  - clusters
+  - components
+  - configs
+  - deployments
+  - federations
+  - repositories
+  - users
+  - backuplocationoperations
+  - organizations
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - create
+  - update
+- apiGroups:
+  - operator.cape.sh
+  resources:
+  - users
+  verbs:
+  - get
+  - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  labels:
+    heritage: cape
+  name: cape-manager
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - services
+  - endpoints
+  - persistentvolumeclaims
+  - events
+  - configmaps
+  - secrets
+  verbs:
+  - '*'
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - create
+  - update
+  - patch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - daemonsets
+  - replicasets
+  - statefulsets
+  verbs:
+  - '*'
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - roles
+  - rolebindings
+  verbs:
+  - '*'
+- apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - servicemonitors
+  verbs:
+  - get
+  - create
+- apiGroups:
+  - apps
+  resourceNames:
+  - hydra-biq-operator
+  resources:
+  - deployments/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - operator.cape.sh
+  resources:
+  - clusters
+  - clusters/status
+  - components
+  - components/status
+  - backuplocations
+  - backuplocations/status
+  - backuplocationoperations
+  - backuplocationoperations/status
+  - federations
+  - federations/status
+  - deployments
+  - deployments/status
+  - repositories
+  - repositories/status
+  - applications
+  - applications/status
+  - configs
+  - configs/status
+  - organizations
+  - organizations/status
+  - users
+  - users/status
+  verbs:
+  - '*'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    heritage: cape
+  name: opa-crd-reader
+rules:
+- apiGroups:
+  - operator.cape.sh
+  resources:
+  - clusters
+  - backuplocations
+  - federations
+  - applications
+  - deployments
+  - repositories
+  - organizations
+  - configs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - roles
+  - rolebindings
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    heritage: cape
+  name: opa-configmap-modifier
+  namespace: cape
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: configmap-modifier
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  name: system:serviceaccounts:cape
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    heritage: cape
+  name: cape-manager-rb
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cape-manager
+subjects:
+- kind: ServiceAccount
+  name: manager
+  namespace: cape
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    heritage: cape
+  name: crd-reader
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: opa-crd-reader
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  name: system:serviceaccounts:cape
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    heritage: cape
+  name: hydra-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: web
+  namespace: cape
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    heritage: cape
+  name: namespace-list-authenticated
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cape-crd-creator
+subjects:
+- kind: Group
+  name: system:authenticated
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    heritage: cape
+  name: opa-viewer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  name: system:serviceaccounts:cape
+---
+apiVersion: v1
+data:
+  cape.rego: |
+    package cape
+    import data.kubernetes
+
+    allow[resource] {
+      input.method = "GET"
+      resource = kubernetes[input.resource][input.namespace][_]
+      roles[[role, resource.metadata.name]]
+      bindings[role]
+    }
+
+    roles[[role, name]] {
+      r := kubernetes.roles[input.namespace][_]
+      role = r.metadata.name
+      name = r.rules[_].resourceNames[_]
+    }
+
+    bindings[role] {
+      rb := kubernetes.rolebindings[input.namespace][_]
+      rb.roleRef.name = role
+      rb.subjects[_].name = input.user
+    }
+kind: ConfigMap
+metadata:
+  labels:
+    heritage: cape
+    openpolicyagent.org/policy: rego
+  name: cape-policy
+  namespace: cape
+---
+apiVersion: v1
+data:
+  AGENT_BASE_URL: http://web:9000
+  API_BASE_URL: http://serviceip.nip.io
+  PUBSUB_URL: ws://pubsub:4040
+  REGISTRY_URL_PREFIX: gcr.io/the-racer-252607
+kind: ConfigMap
+metadata:
+  annotations: {}
+  labels:
+    heritage: cape
+  name: common-env-d95cbt954b
+  namespace: cape
+---
+apiVersion: v1
+data:
+  auth: YWRtOiRhcHIxJFE3Z0tCWFlPJDVQeDNrTi5mblpVWmNkOTdsaVlzUy8K
+kind: Secret
+metadata:
+  creationTimestamp: null
+  labels:
+    heritage: cape
+  name: htpasswd
+  namespace: cape
+---
+apiVersion: v1
+data:
+  .dockerconfigjson: eyJhdXRocyI6eyJnY3IuaW8iOnsidXNlcm5hbWUiOiJfanNvbl9rZXkiLCJwYXNzd29yZCI6IntcbiAgXCJ0eXBlXCI6IFwic2VydmljZV9hY2NvdW50XCIsXG4gIFwicHJvamVjdF9pZFwiOiBcInRoZS1yYWNlci0yNTI2MDdcIixcbiAgXCJwcml2YXRlX2tleV9pZFwiOiBcIjA3MzJiMmEyY2IxNzBiODRiMzRlY2UwYTE1MjZmMWE4ZmU3MzBiODJcIixcbiAgXCJwcml2YXRlX2tleVwiOiBcIi0tLS0tQkVHSU4gUFJJVkFURSBLRVktLS0tLVxcbk1JSUV2UUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktjd2dnU2pBZ0VBQW9JQkFRQ2hEK1RUbVRuQy81UTVcXG4vOEdyYnZrY0x6ZUNQaEU1Z1h3Z1k4RXN6R3diWTEzWU1jdS9vZHFSb3lxNmp5S0owdm43dE10cmUrRHYyY2NWXFxuZnpBMDZ3TVFxdFVpWGNKUHRReVRVRDBEMk4zWjgxeEc5K2JQWENMWHowUEdEMHp2OFJMYVk5R3YzaXRNSURxYVxcbjlVOFNUbWpndkczMDh6NlhSaURFckIyZzYxaFhwOXI0REkzNU5Ta2k1eFFXS01FS1Z2Ylp2MnBNSnpQNlNkNFhcXG5xb2c2dml5b1NvcUlNaGMvYWVUaWlBRDZLZ3BNMjNWSk5WekN2UW1Tb2tGdnNCQ25EU1NuNklNb3VTTitLeUJsXFxuaXZQdXBvaElmSHhjTTB1MUwraFZCYmUyUVhuVEswOHhtZ2p3eFNpTUFvK3MweTYrYlBKVUZ0ZXA1STA4SUYwelxcblYvNTBOczJ6QWdNQkFBRUNnZ0VBQU9jYWtlZTM5U25ZTzRMOWVPZlpxWmpIZk42NjIxR29lbk5VcjlydGVESFVcXG5ZdFBVbjl4WkRKdnMyZzJCLzJKdXJablQwZzhUQndVaUlvZ0xUY3RMYkcvVFcxVkozakhXUWpVZTdSaVlGYjFSXFxuZFJjS24zcnF1Yjd3VXZuZStvYWxZNzFQZlpHSE9KbFlVQlN6Nld4YkZpSU5rN2s3K1Q1c0RKalNYd2FJQU9YRFxcbnF5dWgwclg2c0FoU21WamdYYzE5bGpycFhhY1RCZ3NhbGdxTDJwUjVDMlpBVG1ocHpFOWptYnJFVzhMbmlhU1BcXG5oYTg5ZFlQejJTN1diTEpQenBEcEtRaDRaTXZsUkY2S0ZwNUxoN0tEQ0lvMTZZN1ZJVm1FNUpTWGttbkp1TjJsXFxuVWpxZ1N5dUNtY0MxVTd0d1FLODg2U084VTVSOGhaSmFvSVhlMWo2OVVRS0JnUURoZXhKZnZJdlFJdTh6R1dXVVxcblZUWHhLbk5QclJsSmVuUG1lU1IrN2hlNmwxMDQ5RkUrMUpVWHN5V1BRN3plLzE3QWJGWmMzYnBqL3VvZ1ZMQ3VcXG5GRm53UFRLSHZ5ck5rSzB6d0ZtT092UXMwMy9ydVRmMnV5S0tka1NkSUZ2aFR3eEhVUEoyOWJiWERBZ0Y2U2d1XFxuN29tMmZDODcxeWxzK1NOMTQ0ZFZsaG9aN3dLQmdRQzIzTFdudWNlQWU4ZVZmRzVaeEJpZXZHeHhreUhqTjBTU1xcbkFEdE9xNnJqaFJzT051dGpTODNsQjZMMnIvaVRkV0FFbXRSeUlHMEZiSzIzZjhUMVBoc0E0bDkvMzEyQjRZd0NcXG5JOE9sVzlzeXhIOUZFUW92TjJTTFZSL0hMek1YWFJIa01KcXBXbkFMMjRZWkJaTFpvTm81UWRtVDcrWkRpQkdzXFxuS09mZkpYNGNmUUtCZ1FDOHhUOTl2U2xFS0dzZjJheE1RZ1oyRURjWHhuQjhMck5uaVpZL1dlK3R2RmxFZkc2a1xcbmJtOGZ0MUREbjA4NVZveXFCa2xMV0NwYTJ5aUJ4c1ZnQ0JPLzZFd3NqNlF6RTJPZUJ2UXkrakpBY1JVUWNURmtcXG5OQWxYNkduTExqTWQ3d0wxbGRSWU9hQklhMzh3QzZJam9IclV0eVVJTVRzeVMyWWZwVXhCSC9oY0t3S0JnRmdjXFxuczU5MVFtOWp0WUVQYXpEdjc1a1ZXLy9DRU5NbWYzRUdrWTFQNU5FckF5VnZTeThXaU1peVRGRW42OVJKKzVGY1xcbmRiL2taZ1AySVNMSmUwTmN3TEJGWkJUK3NWVHpOSDZYY3grTHlteUZDSHBrUW84TDF2UFllYTZGek0yV09CZkhcXG5YODc0MkFLdXJjZ0N5b2I1SGczMjcvdDczbTF0OUc0TGErYzNiclFWQW9HQWVBWWxOV1JYS0l5eXpCMWdLME96XFxuRGdUZWg0YlpUbHYvdExoUUpySlpkUXhUYjhUbFlGWjR1NTdHOXRiTjZqSUY1aWp2N3JOUGJRSDJ0Uy9WWkkyK1xcbmZ3RUtmVFV5ZnFKVVk1U3B2aTRJTUVsSnF0YkhYdmxRZ1ljQWZ3OWdneTdZc2s1NUhTcGFlbUdvOUlvNXJ2MldcXG5Pb0RZcStsTXlZUjZsbU9USXhhZzB4TT1cXG4tLS0tLUVORCBQUklWQVRFIEtFWS0tLS0tXFxuXCIsXG4gIFwiY2xpZW50X2VtYWlsXCI6IFwiY2FwZS1yZWFkb25seUB0aGUtcmFjZXItMjUyNjA3LmlhbS5nc2VydmljZWFjY291bnQuY29tXCIsXG4gIFwiY2xpZW50X2lkXCI6IFwiMTAzNDk0ODE3ODA4OTIxODU5NTUyXCIsXG4gIFwiYXV0aF91cmlcIjogXCJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20vby9vYXV0aDIvYXV0aFwiLFxuICBcInRva2VuX3VyaVwiOiBcImh0dHBzOi8vb2F1dGgyLmdvb2dsZWFwaXMuY29tL3Rva2VuXCIsXG4gIFwiYXV0aF9wcm92aWRlcl94NTA5X2NlcnRfdXJsXCI6IFwiaHR0cHM6Ly93d3cuZ29vZ2xlYXBpcy5jb20vb2F1dGgyL3YxL2NlcnRzXCIsXG4gIFwiY2xpZW50X3g1MDlfY2VydF91cmxcIjogXCJodHRwczovL3d3dy5nb29nbGVhcGlzLmNvbS9yb2JvdC92MS9tZXRhZGF0YS94NTA5L2NhcGUtcmVhZG9ubHklNDB0aGUtcmFjZXItMjUyNjA3LmlhbS5nc2VydmljZWFjY291bnQuY29tXCJcbn0iLCJlbWFpbCI6ImluZm9AYmlxbWluZC5jb20iLCJhdXRoIjoiWDJwemIyNWZhMlY1T25zS0lDQWlkSGx3WlNJNklDSnpaWEoyYVdObFgyRmpZMjkxYm5RaUxBb2dJQ0p3Y205cVpXTjBYMmxrSWpvZ0luUm9aUzF5WVdObGNpMHlOVEkyTURjaUxBb2dJQ0p3Y21sMllYUmxYMnRsZVY5cFpDSTZJQ0l3TnpNeVlqSmhNbU5pTVRjd1lqZzBZak0wWldObE1HRXhOVEkyWmpGaE9HWmxOek13WWpneUlpd0tJQ0FpY0hKcGRtRjBaVjlyWlhraU9pQWlMUzB0TFMxQ1JVZEpUaUJRVWtsV1FWUkZJRXRGV1MwdExTMHRYRzVOU1VsRmRsRkpRa0ZFUVU1Q1oydHhhR3RwUnpsM01FSkJVVVZHUVVGVFEwSkxZM2RuWjFOcVFXZEZRVUZ2U1VKQlVVTm9SQ3RVVkcxVWJrTXZOVkUxWEc0dk9FZHlZblpyWTB4NlpVTlFhRVUxWjFoM1oxazRSWE42UjNkaVdURXpXVTFqZFM5dlpIRlNiM2x4Tm1wNVMwb3dkbTQzZEUxMGNtVXJSSFl5WTJOV1hHNW1la0V3Tm5kTlVYRjBWV2xZWTBwUWRGRjVWRlZFTUVReVRqTmFPREY0UnprcllsQllRMHhZZWpCUVIwUXdlblk0VWt4aFdUbEhkak5wZEUxSlJIRmhYRzQ1VlRoVFZHMXFaM1pITXpBNGVqWllVbWxFUlhKQ01tYzJNV2hZY0RseU5FUkpNelZPVTJ0cE5YaFJWMHROUlV0V2RtSmFkakp3VFVwNlVEWlRaRFJZWEc1eGIyYzJkbWw1YjFOdmNVbE5hR012WVdWVWFXbEJSRFpMWjNCTk1qTldTazVXZWtOMlVXMVRiMnRHZG5OQ1EyNUVVMU51TmtsTmIzVlRUaXRMZVVKc1hHNXBkbEIxY0c5b1NXWkllR05OTUhVeFRDdG9Wa0ppWlRKUldHNVVTekE0ZUcxbmFuZDRVMmxOUVc4cmN6QjVOaXRpVUVwVlJuUmxjRFZKTURoSlJqQjZYRzVXTHpVd1RuTXlla0ZuVFVKQlFVVkRaMmRGUVVGUFkyRnJaV1V6T1ZOdVdVODBURGxsVDJaYWNWcHFTR1pPTmpZeU1VZHZaVzVPVlhJNWNuUmxSRWhWWEc1WmRGQlZiamw0V2tSS2RuTXlaekpDTHpKS2RYSmFibFF3WnpoVVFuZFZhVWx2WjB4VVkzUk1Za2N2VkZjeFZrb3pha2hYVVdwVlpUZFNhVmxHWWpGU1hHNWtVbU5MYmpOeWNYVmlOM2RWZG01bEsyOWhiRmszTVZCbVdrZElUMHBzV1ZWQ1UzbzJWM2hpUm1sSlRtczNhemNyVkRWelJFcHFVMWgzWVVsQlQxaEVYRzV4ZVhWb01ISllObk5CYUZOdFZtcG5XR014T1d4cWNuQllZV05VUW1kellXeG5jVXd5Y0ZJMVF6SmFRVlJ0YUhCNlJUbHFiV0p5UlZjNFRHNXBZVk5RWEc1b1lUZzVaRmxRZWpKVE4xZGlURXBRZW5CRWNFdFJhRFJhVFhac1VrWTJTMFp3TlV4b04wdEVRMGx2TVRaWk4xWkpWbTFGTlVwVFdHdHRia3AxVGpKc1hHNVZhbkZuVTNsMVEyMWpRekZWTjNSM1VVczRPRFpUVHpoVk5WSTRhRnBLWVc5SldHVXhhalk1VlZGTFFtZFJSR2hsZUVwbWRrbDJVVWwxT0hwSFYxZFZYRzVXVkZoNFMyNU9VSEpTYkVwbGJsQnRaVk5TS3pkb1pUWnNNVEEwT1VaRkt6RktWVmh6ZVZkUVVUZDZaUzh4TjBGaVJscGpNMkp3YWk5MWIyZFdURU4xWEc1R1JtNTNVRlJMU0haNWNrNXJTekI2ZDBadFQwOTJVWE13TXk5eWRWUm1NblY1UzB0a2ExTmtTVVoyYUZSM2VFaFZVRW95T1dKaVdFUkJaMFkyVTJkMVhHNDNiMjB5WmtNNE56RjViSE1yVTA0eE5EUmtWbXhvYjFvM2QwdENaMUZETWpOTVYyNTFZMlZCWlRobFZtWkhOVnA0UW1sbGRrZDRlR3Q1U0dwT01GTlRYRzVCUkhSUGNUWnlhbWhTYzA5T2RYUnFVemd6YkVJMlRESnlMMmxVWkZkQlJXMTBVbmxKUnpCR1lrc3lNMlk0VkRGUWFITkJOR3c1THpNeE1rSTBXWGREWEc1Sk9FOXNWemx6ZVhoSU9VWkZVVzkyVGpKVFRGWlNMMGhNZWsxWVdGSklhMDFLY1hCWGJrRk1NalJaV2tKYVRGcHZUbTgxVVdSdFZEY3JXa1JwUWtkelhHNUxUMlptU2xnMFkyWlJTMEpuVVVNNGVGUTVPWFpUYkVWTFIzTm1NbUY0VFZGbldqSkZSR05ZZUc1Q09FeHlUbTVwV2xrdlYyVXJkSFpHYkVWbVJ6WnJYRzVpYlRobWRERkVSRzR3T0RWV2IzbHhRbXRzVEZkRGNHRXllV2xDZUhOV1owTkNUeTgyUlhkemFqWlJla1V5VDJWQ2RsRjVLMnBLUVdOU1ZWRmpWRVpyWEc1T1FXeFlOa2R1VEV4cVRXUTNkMHd4YkdSU1dVOWhRa2xoTXpoM1F6WkphbTlJY2xWMGVWVkpUVlJ6ZVZNeVdXWndWWGhDU0M5b1kwdDNTMEpuUm1kalhHNXpOVGt4VVcwNWFuUlpSVkJoZWtSMk56VnJWbGN2TDBORlRrMXRaak5GUjJ0Wk1WQTFUa1Z5UVhsV2RsTjVPRmRwVFdsNVZFWkZialk1VWtvck5VWmpYRzVrWWk5cldtZFFNa2xUVEVwbE1FNWpkMHhDUmxwQ1ZDdHpWbFI2VGtnMldHTjRLMHg1YlhsR1EwaHdhMUZ2T0V3eGRsQlpaV0UyUm5wTk1sZFBRbVpJWEc1WU9EYzBNa0ZMZFhKalowTjViMkkxU0djek1qY3ZkRGN6YlRGME9VYzBUR0VyWXpOaWNsRldRVzlIUVdWQldXeE9WMUpZUzBsNWVYcENNV2RMTUU5NlhHNUVaMVJsYURSaVdsUnNkaTkwVEdoUlNuSktXbVJSZUZSaU9GUnNXVVphTkhVMU4wYzVkR0pPTm1wSlJqVnBhblkzY2s1UVlsRklNblJUTDFaYVNUSXJYRzVtZDBWTFpsUlZlV1p4U2xWWk5WTndkbWswU1UxRmJFcHhkR0pJV0hac1VXZFpZMEZtZHpsblozazNXWE5yTlRWSVUzQmhaVzFIYnpsSmJ6VnlkakpYWEc1UGIwUlpjU3RzVFhsWlVqWnNiVTlVU1hoaFp6QjRUVDFjYmkwdExTMHRSVTVFSUZCU1NWWkJWRVVnUzBWWkxTMHRMUzFjYmlJc0NpQWdJbU5zYVdWdWRGOWxiV0ZwYkNJNklDSmpZWEJsTFhKbFlXUnZibXg1UUhSb1pTMXlZV05sY2kweU5USTJNRGN1YVdGdExtZHpaWEoyYVdObFlXTmpiM1Z1ZEM1amIyMGlMQW9nSUNKamJHbGxiblJmYVdRaU9pQWlNVEF6TkRrME9ERTNPREE0T1RJeE9EVTVOVFV5SWl3S0lDQWlZWFYwYUY5MWNta2lPaUFpYUhSMGNITTZMeTloWTJOdmRXNTBjeTVuYjI5bmJHVXVZMjl0TDI4dmIyRjFkR2d5TDJGMWRHZ2lMQW9nSUNKMGIydGxibDkxY21raU9pQWlhSFIwY0hNNkx5OXZZWFYwYURJdVoyOXZaMnhsWVhCcGN5NWpiMjB2ZEc5clpXNGlMQW9nSUNKaGRYUm9YM0J5YjNacFpHVnlYM2cxTURsZlkyVnlkRjkxY213aU9pQWlhSFIwY0hNNkx5OTNkM2N1WjI5dloyeGxZWEJwY3k1amIyMHZiMkYxZEdneUwzWXhMMk5sY25Seklpd0tJQ0FpWTJ4cFpXNTBYM2cxTURsZlkyVnlkRjkxY213aU9pQWlhSFIwY0hNNkx5OTNkM2N1WjI5dloyeGxZWEJwY3k1amIyMHZjbTlpYjNRdmRqRXZiV1YwWVdSaGRHRXZlRFV3T1M5allYQmxMWEpsWVdSdmJteDVKVFF3ZEdobExYSmhZMlZ5TFRJMU1qWXdOeTVwWVcwdVozTmxjblpwWTJWaFkyTnZkVzUwTG1OdmJTSUtmUT09In19fQ==
+kind: Secret
+metadata:
+  creationTimestamp: null
+  labels:
+    heritage: cape
+  name: registry-secret
+  namespace: cape
+type: kubernetes.io/dockerconfigjson
+---
+apiVersion: v1
+data:
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN4RENDQWF3Q0NRRElSRDZzMlkzYzhEQU5CZ2txaGtpRzl3MEJBUXNGQURBa01SQXdEZ1lEVlFRRERBZGoKWVhCbExuTm9NUkF3RGdZRFZRUUtEQWRqWVhCbExuTm9NQjRYRFRJd01EVXpNREV4TlRRME1Wb1hEVEkxTVRFeQpNREV4TlRRME1Wb3dKREVRTUE0R0ExVUVBd3dIWTJGd1pTNXphREVRTUE0R0ExVUVDZ3dIWTJGd1pTNXphRENDCkFTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBT2UzN2lBQlBOWEdDMVpCcWZLbm13aVIKSTgweUtCS3h3WGxDNG1uYkNDemloSlpWb0xWSi8rYUFXQm5NU3ozKzJodWFXUXJCdUlKdGIvTUNXVDNlTlJaQwpOTVJmR0thUnlXZlcwb3RoMkVuQXhZUkNBV3JUY3FkL0t4TXpKWGZ5NGZVRUVseG9NSC92VmgrTnVnZEJhbldICnVWNEZOK1IzalRPTXhzS1ExcGJxdG1ZN2FoaWYvT1BXeGhqZERMQkdhWU8vSDBuQldlL1lueXRZdUtVSm4zSWIKeVpwRVMzN0p5K29MN0FmQ0Y5emtzYzdCWHIxRzNyQXhKNXZzU2RPOXlSdjBxdkt5Q2c4NTRJVlZrTHNOSHdZVApaR1doYzFvN21zV2VaL1V2UldEQTdPMXF0UXpta3RETW5RdXVvbXJjWWs4djR6MG12N0lMc0N4Sjdid3o5VWNDCkF3RUFBVEFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBSUg2TThNMmlBN241ejlpV09lZ2tJazd0SUJvNC9ybzgKUUtEYnd4WTk3c3d4U2trNko2eWRxa3VsaFMyVXFnOEFCU2FkVHFGN2x0RHY5QVo2VGlTNDJlVlpSS0ZxWFNhdwpYdEdvSVNlNGp1MlBzNmNOMGlxdGo4dWkrdGpkdTBUc1haSWlJSk9hM0QrR2w1bDNKOFpERWtvcUEzRnZtQWM4CjNpQWNOcndUMTNzUWNteXg4bkl0VTZFcDJ1ampxdmRYZmMyOVBJQnZRK2RwalhuaVFsN1RyWkJ6cHpvSCtwOFMKeGtuZHNHd2tGeFNiNFkxUGJhWDRWbmpWcm0zR2hSakdlWUVuayt0Mi9NRXhVZU5tVU5XSXZ4clBMczd1U2hXbApEZXZsV1UwaWR3RFVqWnhJNFl6bXdSeHlnY2x0Y2lKTkMwRFI1dEpleWhvWVB2elBnVVk5VEE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+  tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2d0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktrd2dnU2xBZ0VBQW9JQkFRRG50KzRnQVR6VnhndFcKUWFueXA1c0lrU1BOTWlnU3NjRjVRdUpwMndnczRvU1dWYUMxU2YvbWdGZ1p6RXM5L3RvYm1sa0t3YmlDYlcvegpBbGs5M2pVV1FqVEVYeGlta2NsbjF0S0xZZGhKd01XRVFnRnEwM0tuZnlzVE15VjM4dUgxQkJKY2FEQi83MVlmCmpib0hRV3AxaDdsZUJUZmtkNDB6ak1iQ2tOYVc2clptTzJvWW4vemoxc1lZM1F5d1JtbUR2eDlKd1ZudjJKOHIKV0xpbENaOXlHOG1hUkV0K3ljdnFDK3dId2hmYzVMSE93VjY5UnQ2d01TZWI3RW5UdmNrYjlLcnlzZ29QT2VDRgpWWkM3RFI4R0UyUmxvWE5hTzVyRm5tZjFMMFZnd096dGFyVU01cExRekowTHJxSnEzR0pQTCtNOUpyK3lDN0FzClNlMjhNL1ZIQWdNQkFBRUNnZ0VBVCtWZWlOQ0VibDFENlhEb3JVOVhLR1FMQ1NTREpyYjlzOWI1QkhET1o5T08KemRzbWQzdlZiVi9SZ011dEllb3V3QmUvSGZOZnNERVZ5WitFcjgxZlZwWnJaVTQ0eks0MTJNVDhnYXl5Qy9RWQo1cHB2cktyTnZLMGZhQlpaay9zK0orSklobTR5VXRwdVFxRDJoS3Zzaml2SElZRUJIWmlQS2pnZkRGVXVlSWc3CmNyc0hxRFFaQklUVWFCUy9CWTVMQ1duSDcwUk5GOFFFNjVYWTZhWU1DdG9PRGJnd2Vlek1kVEFLL2hEVzVBS2cKaVZNNjRhQ2JITlBkRTBXWnQrVEtaT0d3NlQyWU1SNW9iZDA1QmxZeURrbmo3UXVSSDJKNDBQcnpCdDlzcmNkNAoxZldBWEdQUURKQmtiaEp5ZGpvUmxBdktxVGZ6cEE5eGRoSDVmMElOZVFLQmdRRDNyUTZsWW9SSHlXM1pZMDJ3CkM1djR0MTNubkpOeUVOMkVRejBEOFRjclJ0RkNyenF3eUs2VGtMSlUrMVk3UzkrUHlhUHJCUlkvNmYyaVFVZ0MKYTNXZzNnc2pXVFZEUVhiY3ZKb1E0MGFHZ1ZnZFA0MktYb3RsanpsUVlhczNzd0tGanpGMjVJNHY1RWovUTU0MgpNZEFXVFhnQmFmb0hlY2p6c3UxcmhlaTM0d0tCZ1FEdmdaUVByd0g4L1ZkdkFSeG43MHdaRERockJNaUh4RktYCk9UekU5eFVhL1NXeW5jdElHWFUvTVIxLzBxMzlOUFNLaDZ3Z1Z4S2Z4eEFCZTlQdHRlYm9CWlZ5MjJlZTNIVysKeHNiRjN6MHhxRmJKcm5ZVnN2TWw5V2RIUzdVNTRjTzRycXFrVDlZQ0RxU3B0S0xzS2dyaUM3MStSd1I0TUVBTApuTG14clgyaVRRS0JnUUNodGdhSUNVamhMaTFnOEt0NnREbkVMTVZOUWpnckU4UHVaWkJqRUkyNjNlUW5yQTJmCis0ZXdwWnNxVFdoQ0V3b0c4ZHJxeWtsNnRhWjYyRERTRTZPYnd4NTJsL3BrelV0MFdGZ25pcDB6bVNRVkJMZS8Kam5kcGVoZ3IyWGxYUnJQd3pFdTVtd1VUVS9RdFp0TFlBN0lmdmJrTEEwelNzTHQ2RW10ZDl2SzVqUUtCZ1FEZApRMGVHeWJZN2c4eS9selluNnRIUm5oR05CTWxCYkNTazRsTDY0QTBXZHVIWnhwOGpSNm1pckh4Rk4xeFh2UkZoCjNYOHVEV0wrU3dmRlp5RmR6UnU2SkZaeDJySTYrQTZySmJaQzNUOEtYaXQzZlA1SWc1N1A1WXY1T0w3KzcweEMKbE5LK282YmhGYWdYdy9KejNVOWFqMkFMaGc1aC9xbGNVUGpZWlovWVRRS0JnUUREbE1WdTlpRGU0VjY5WUUvawowU1hzY3hyWGtYSFBRcGhoZVpOajFRdjNuQmFZbCt3L0VLK0JYVnlSYzdnUnlEdVhpZTJhTFdyNFJFWWphNGs3CkYvT1RLSDQ5QVlNc2FxSjJjajJWSVAxTzRWMGJKUXRZVU5IbGdQcG45b1RkdncrNXR5T1JBbDI1MFRPZUg1SGQKVHIyQjkvb3YxWkdWQy94WHB0TlE1MWMrV0E9PQotLS0tLUVORCBQUklWQVRFIEtFWS0tLS0tCg==
+kind: Secret
+metadata:
+  labels:
+    heritage: cape
+  name: web-tls-dummy
+  namespace: cape
+type: kubernetes.io/tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    heritage: cape
+  name: opa
+  namespace: cape
+spec:
+  ports:
+  - port: 8181
+  selector:
+    app: opa
+    heritage: cape
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    heritage: cape
+  name: pubsub
+  namespace: cape
+spec:
+  ports:
+  - port: 4040
+  selector:
+    app: pubsub
+    heritage: cape
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    heritage: cape
+  name: web
+  namespace: cape
+spec:
+  ports:
+  - name: http-web
+    port: 3000
+    protocol: TCP
+    targetPort: 3000
+  - name: http-api
+    port: 9000
+    protocol: TCP
+    targetPort: 9000
+  - name: http-api-2
+    port: 80
+    protocol: TCP
+    targetPort: 9000
+  - name: auth-proxy
+    port: 4180
+    protocol: TCP
+    targetPort: 4180
+  selector:
+    app: web
+    heritage: cape
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    heritage: cape
+  name: manager
+  namespace: cape
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      heritage: cape
+      name: manager
+  template:
+    metadata:
+      labels:
+        heritage: cape
+        name: manager
+    spec:
+      containers:
+      - command:
+        - cape-manager
+        env:
+        - name: WATCH_NAMESPACE
+          value: ""
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: OPERATOR_NAME
+          value: cape-manager
+        envFrom:
+        - configMapRef:
+            name: common-env-d95cbt954b
+        image: gcr.io/the-racer-252607/cape-manager:latest
+        imagePullPolicy: Always
+        name: manager
+      serviceAccountName: manager
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    heritage: cape
+  name: opa
+  namespace: cape
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opa
+      heritage: cape
+  template:
+    metadata:
+      labels:
+        app: opa
+        heritage: cape
+    spec:
+      containers:
+      - args:
+        - run
+        - --server
+        image: openpolicyagent/opa
+        name: opa
+        ports:
+        - containerPort: 8181
+          name: http
+      - args:
+        - --replicate=operator.cape.sh/v1alpha1/clusters
+        - --replicate=operator.cape.sh/v1alpha1/backuplocations
+        - --replicate=operator.cape.sh/v1alpha1/federations
+        - --replicate=operator.cape.sh/v1alpha1/deployments
+        - --replicate=operator.cape.sh/v1alpha1/applications
+        - --replicate=operator.cape.sh/v1alpha1/repositories
+        - --replicate=operator.cape.sh/v1alpha1/organizations
+        - --replicate=operator.cape.sh/v1alpha1/configs
+        - --replicate=rbac.authorization.k8s.io/v1/rolebindings
+        - --replicate=rbac.authorization.k8s.io/v1/roles
+        - --policies=cape
+        - --require-policy-label=true
+        image: openpolicyagent/kube-mgmt:0.10
+        name: kube-mgmt
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    heritage: cape
+  name: pubsub
+  namespace: cape
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pubsub
+      heritage: cape
+  template:
+    metadata:
+      labels:
+        app: pubsub
+        heritage: cape
+    spec:
+      containers:
+      - args:
+        - -listen
+        - :4040
+        - -events
+        - ""
+        - -debug
+        image: alash3al/wsify
+        name: main
+        ports:
+        - containerPort: 4040
+          name: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    heritage: cape
+  name: web
+  namespace: cape
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+      heritage: cape
+  template:
+    metadata:
+      labels:
+        app: web
+        heritage: cape
+    spec:
+      containers:
+      - env:
+        - name: API_BASE_URL
+          value: http://localhost:9000
+        - name: PORT
+          value: "3000"
+        image: gcr.io/the-racer-252607/cape-ui:latest
+        imagePullPolicy: Always
+        name: web
+        ports:
+        - containerPort: 3000
+          name: web
+      - env:
+        - name: BYPASS_AUTH
+          value: "1"
+        - name: PORT
+          value: "9000"
+        - name: OAUTH2_PROXY_COOKIE_SECRET
+          value: 768qwcisfh768qwcisfh
+        - name: OPA_URL
+          value: http://opa:8181
+        envFrom:
+        - configMapRef:
+            name: common-env-d95cbt954b
+        image: gcr.io/the-racer-252607/cape-api:latest
+        imagePullPolicy: Always
+        name: api
+        ports:
+        - containerPort: 9000
+          name: proxy
+      - args:
+        - --http-address=0.0.0.0:4180
+        - --set-authorization-header=true
+        - --cookie-secret=768qwcisfh768qwcisfh
+        - -provider=keycloak
+        - -upstream=http://0.0.0.0:3000
+        - -cookie-secure=false
+        env:
+        - name: PORT
+          value: "4180"
+        - name: OAUTH2_PROXY_REDIRECT_URL
+          value: dummy
+        - name: OAUTH2_PROXY_CLIENT_ID
+          value: dummy
+        - name: OAUTH2_PROXY_CLIENT_SECRET
+          value: dummy
+        - name: OAUTH2_PROXY_EMAIL_DOMAINS
+          value: biqmind.com
+        - name: OAUTH2_PROXY_COOKIE_SECRET
+          value: 768qwcisfh768qwcisfh
+        - name: OAUTH2_PROXY_VALIDATE_URL
+          value: dummy
+        - name: OAUTH2_PROXY_REDEEM_URL
+          value: dummy
+        - name: OAUTH2_PROXY_LOGIN_URL
+          value: dummy
+        image: biqmind/oauth2-proxy
+        imagePullPolicy: Always
+        name: auth-proxy
+        ports:
+        - containerPort: 4180
+          name: proxy
+      serviceAccountName: web
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  labels:
+    heritage: cape
+  name: ui-ingress
+  namespace: cape
+spec:
+  rules:
+  - host: serviceip.nip.io
+    http:
+      paths:
+      - backend:
+          serviceName: web
+          servicePort: 3000
+        path: /
+      - backend:
+          serviceName: web
+          servicePort: 9000
+        path: /v1/
+      - backend:
+          serviceName: web
+          servicePort: 3000
+        path: /install
+      - backend:
+          serviceName: docs
+          servicePort: 3000
+        path: /docs/

@@ -1,0 +1,7 @@
+---
+- name: execute the uninstall script
+  script: ./roles/reset/files/k3s-uninstall.sh
+  ignore_errors: yes
+- name: daemon_reload
+  systemd:
+    daemon_reload: yes

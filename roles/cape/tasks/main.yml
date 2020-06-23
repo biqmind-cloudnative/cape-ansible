@@ -1,0 +1,41 @@
+---
+# tasks file for cape
+
+- name: Copy install yaml
+  copy:
+      src: ./roles/cape/files/install.yaml
+      dest: /tmp/install.yaml
+     
+
+- name: Copy crd yaml
+  copy:
+      src: ./roles/cape/files/crd-install.yaml
+      dest: /tmp/crd-install.yaml
+    
+
+- name: create namespace
+  shell: 
+    cmd: "kubectl create ns cape &"
+  ignore_errors: yes
+
+- pause:
+    seconds: 3
+
+- name: Replace IPs
+  vars:
+    MASTERIP: "server_master_ip"
+  replace:
+    path: "/tmp/install.yaml"
+    regexp: 'serviceip'
+    replace: "{{ MASTERIP }}"        
+
+
+- name: Apply install.yaml
+  shell:
+    cmd: kubectl apply -f /tmp/install.yaml
+  ignore_errors: yes
+
+- name: Apply install.yaml
+  shell:
+      cmd: kubectl apply -f /tmp/crd-install.yaml
+  ignore_errors: yes
