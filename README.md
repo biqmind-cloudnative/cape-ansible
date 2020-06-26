@@ -1,19 +1,26 @@
+# Welcome to CAPE
+About 
+Organizations struggle managing their Kubernetes clusters at a level expected by various stakeholders; they are debilitated by a lack of resources, expertise and tools. Organizations need to overcome these obstacles and become Kubernetes-ready. CAPE will provide organizations with the tooling and ability to:
+
+- Disaster Recovery
+  - Utilize Velero, an open source Kubernetes tool for backup & restore
+  - Perform single scheduled backup & restore
+  - Perform multi-cluster & multi-cloud backup & restore
+- Multi-cluster application deployment
+- Multi-cluster DNS and ingress
+
+via CAPE, giving the you the ability to manage Kubernetes clusters on day one without specialised knowledge or proprietary API/CLI experience.
+
 # Deploy CAPE and Kubernetes with Docker
 
 <p align="center" style="background-color:#23327c">
-  <img src="https://raw.githubusercontent.com/cape-sh/cape/master/assets/logo.png" height="250px" width="400px"/>
+  <img src="https://raw.githubusercontent.com/cape-sh/cape/master/assets/logo.png" height="125px" width="200px"/>
 </p>
 
-#### Recommended System requirements
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/4KJt8NXTO8E/0.jpg)](https://youtu.be/4KJt8NXTO8E)
 
-```
-OS: Centos 7.3/7.4/7.5  
-CPU: 2 core
-RAM : 4GB RAM
-Disk Space: 10 GB free 
-Server Internet access : yes
-```
----
+
+===
 
 # How to deploy CAPE SAAS
 
@@ -39,6 +46,8 @@ Do you want to access CapeUI with Public IP env.
 curl  https://raw.githubusercontent.com/cape-sh/cape-k3s-ansible-deployment/master/script/capesaasPubIP.sh > capesaasPubIP.sh
 sh capesaasPubIP.sh
 ```
+
+
 ===
 
 ### Now access the CAPE GUI 
@@ -90,7 +99,15 @@ ansible-playbook reset.yml
 ```
 > "cape-k3s-ansible-deployment" directory is located where capesaasPubIP.sh or capesaasPvtIP.sh script was downloaded 
 
+#### Recommended System requirements
 
+```
+OS: Centos 7.3/7.4/7.5  
+CPU: 2 core
+RAM : 4GB RAM
+Disk Space: 10 GB free 
+Server Internet access : yes
+```
 
 ## Getting Started with CAPE
 
