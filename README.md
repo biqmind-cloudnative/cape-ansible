@@ -17,23 +17,26 @@ Server Internet access : yes
 
 # How to deploy CAPE SAAS
 
-> Do the below steps as "root" user in the machine where you want to deploy.
+> Do the below steps as "root" user in the machine where you want to deploy. Choose from option 1 or 2 below
+
+Option 1: 
 
 Do you want to access CapeUI with local private IP env.
 
->   Eg: If you and your VM is at home and you want IP like 192.168.1.7 to access
+>   Eg: If you and your VM is at home and you want Private IP like 192.168.1.7 to access
  
 ```bash
-wget https://raw.githubusercontent.com/cape-sh/cape-k3s-ansible-deployment/master/script/capesaaPvtIP.sh
+curl https://raw.githubusercontent.com/cape-sh/cape-k3s-ansible-deployment/master/script/capesaaPvtIP.sh > capesaaPvtIP.sh
 sh capesaaPvtIP.sh
 ```
+Option 2:
 
 Do you want to access CapeUI with Public IP env.
 
->   Eg: If your VM is on cloud and have public ip 
+>   Eg: If your VM is on cloud and have public ip like 13.103.25.99
 
 ```bash
-wget https://raw.githubusercontent.com/cape-sh/cape-k3s-ansible-deployment/master/script/capesaasPubIP.sh
+curl  https://raw.githubusercontent.com/cape-sh/cape-k3s-ansible-deployment/master/script/capesaasPubIP.sh > capesaasPubIP.sh
 sh capesaasPubIP.sh
 ```
 ===
