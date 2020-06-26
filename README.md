@@ -25,15 +25,15 @@ CAPE enables you to manage Kubernetes clusters on day one without specialized kn
 
 ---
 
-# Try CAPE SAAS for FREE
+## Try CAPE SAAS for FREE
 
 ### Install CAPE
 
-> There are 2 options for installing CAPE. Follow one of the options below as "root" user on the machine that you want to deploy to.
+> There are 2 options for accessing CAPE. Follow one of the options below as "root" user on the machine that you want to deploy to.
 
 Option 1: 
 
-Access CAPE GUI with a local private IP env.
+Access CAPE UI with a local private IP env.
 
 >   Eg: You and your VM are at home and you want to access using a private IP e.g., 192.168.1.7
  
@@ -44,7 +44,7 @@ sh capesaaPvtIP.sh
 
 Option 2:
 
-Access CAPE GUI with a public IP env.
+Access CAPE UI with a public IP env.
 
 >   Eg: Your VM is in the cloud and has a public IP e.g., 13.103.25.99
 
@@ -54,7 +54,7 @@ sh capesaasPubIP.sh
 ```
 ---
 
-### Access the CAPE GUI 
+### Access CAPE UI 
 
 The service may take 1-5 mins to come up based on the server config and the internet bandwidth.
 
@@ -70,8 +70,6 @@ http://<Your_server_ip>.nip.io/
 ### What do the different Ansible roles do?
 
 ```
- Ansible roles:
- 
  1. Prereq: Prerequisite config at the os layer e.g., autoconfigure all repositories , SELinux , disable firewall etc.
  2. Download: Downloads all the relevant packages and scripts
  3. K3S: Installs k3s, crictl master on centos7/RHEL7 
@@ -105,7 +103,7 @@ ansible-playbook reset.yml
 
 ---
 
-#### Recommended System requirements
+### Recommended System requirements
 
 ```
 OS: Centos 7.3/7.4/7.5  
@@ -117,11 +115,12 @@ Server Internet access: Yes
 
 ---
 
-## Getting Started with CAPE
+## Get Started with CAPE
 
-Get started quickly using this [tutorial](https://docs.cape.sh/docs/simple-install)
+Use this [tutorial](https://docs.cape.sh/docs/simple-install) to get started quickly.
 
-## Getting Involved
+
+## Get Involved
 
 We appreciate your feedback and active participation.
 
