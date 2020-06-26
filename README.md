@@ -1,5 +1,10 @@
 # Welcome to CAPE
-About 
+<p align="center" style="background-color:#23327c">
+  <img src="https://raw.githubusercontent.com/cape-sh/cape/master/assets/logo.png" height="125px" width="200px"/>
+</p>
+
+**About**
+
 Organizations struggle managing their Kubernetes clusters at a level expected by various stakeholders; they are debilitated by a lack of resources, expertise and tools. Organizations need to overcome these obstacles and become Kubernetes-ready. CAPE will provide organizations with the tooling and ability to:
 
 - Disaster Recovery
@@ -11,18 +16,18 @@ Organizations struggle managing their Kubernetes clusters at a level expected by
 
 via CAPE, giving the you the ability to manage Kubernetes clusters on day one without specialised knowledge or proprietary API/CLI experience.
 
-# Deploy CAPE and Kubernetes with Docker
+---
 
-<p align="center" style="background-color:#23327c">
-  <img src="https://raw.githubusercontent.com/cape-sh/cape/master/assets/logo.png" height="125px" width="200px"/>
-</p>
+**Click the YouTube video URL below to find some more:**
 
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/4KJt8NXTO8E/0.jpg)](https://youtu.be/4KJt8NXTO8E)
+[![](http://img.youtube.com/vi/4KJt8NXTO8E/0.jpg)](http://www.youtube.com/watch?v=4KJt8NXTO8E "Biqmind Cape")
 
 
-===
+---
 
-# How to deploy CAPE SAAS
+# Try CAPE SAAS for FREE
+
+**How to Deploy**
 
 > Do the below steps as "root" user in the machine where you want to deploy. Choose from option 1 or 2 below
 
@@ -48,7 +53,7 @@ sh capesaasPubIP.sh
 ```
 
 
-===
+---
 
 ### Now access the CAPE GUI 
 
@@ -62,7 +67,7 @@ http://<Your_server_ip>.nip.io/
 ** All CAPE documentation is available [here](https://docs.cape.sh/docs/) **
 
 
-===
+---
 
 ### What the different Ansible Roles do:
 
