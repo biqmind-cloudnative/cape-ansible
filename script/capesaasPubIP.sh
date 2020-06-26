@@ -19,7 +19,7 @@ yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarc
 yum install -y git ansible
 git clone https://github.com/cape-sh/cape-ansible.git
 cd ccape-ansible/
-PvtIP=`hostname -i`
+PvtIP=`hostname -i | awk '{print $1}'`
 PubIP=`curl https://api.ipify.org/`
 sed -i  "s#server_master_ip#$PvtIP#g"  inventory/hosts.ini
 sed  -i "s#server_master_ip#$PubIP#g"  roles/cape/tasks/main.yml
