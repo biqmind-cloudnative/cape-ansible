@@ -38,7 +38,7 @@ Access CAPE UI with a local private IP env.
 >   Eg: You and your VM are at home and you want to access using a private IP e.g., 192.168.1.7
  
 ```bash
-curl https://raw.githubusercontent.com/cape-sh/cape-k3s-ansible-deployment/master/script/capesaaPvtIP.sh > capesaaPvtIP.sh
+curl https://raw.githubusercontent.com/cape-sh/cape-ansible/master/script/capesaaPvtIP.sh > capesaaPvtIP.sh
 sh capesaaPvtIP.sh
 ```
 
@@ -49,7 +49,7 @@ Access CAPE UI with a public IP env.
 >   Eg: Your VM is in the cloud and has a public IP e.g., 13.103.25.99
 
 ```bash
-curl  https://raw.githubusercontent.com/cape-sh/cape-k3s-ansible-deployment/master/script/capesaasPubIP.sh > capesaasPubIP.sh
+curl  https://raw.githubusercontent.com/cape-sh/cape-ansible/master/script/capesaasPubIP.sh > capesaasPubIP.sh
 sh capesaasPubIP.sh
 ```
 ---
@@ -96,10 +96,10 @@ Login as root to your machine
 > Run this playbook to uninstall Kubernetes and crictl
 
 ```bash
-cd cape-k3s-ansible-deployment
+cd cape-ansible
 ansible-playbook reset.yml
 ```
-> "cape-k3s-ansible-deployment" directory is located where the capesaasPubIP.sh or capesaasPvtIP.sh script was downloaded earlier.
+> "cape-ansible" directory is located where the capesaasPubIP.sh or capesaasPvtIP.sh script was downloaded earlier.
 
 ---
 
